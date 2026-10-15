@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Habits</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Habits">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#faf9f6">
+<style>
+:root{--bg:#faf9f6;--card:#fff;--ink:#1c1c1a;--mute:#8a8a84;--line:#e6e4de;--acc:#2f7d5b;--tod:#f1efe9;--red:#d0453b;--redbg:#fbe9e7;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root{--bg:#141413;--card:#1e1e1c;--ink:#f1f0ec;--mute:#8d8c85;--line:#2e2e2b;--acc:#5fc59a;--tod:#262624;--red:#ef6b60;--redbg:#3a1f1c}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+main{max-width:720px;margin:0 auto;padding:24px 12px 48px}
+h1{font-size:28px;font-weight:700;letter-spacing:-.02em;margin:0}
+#today{margin:2px 0 0;color:var(--mute);font-size:14px}
+.bar{display:flex;align-items:center;justify-content:space-between;margin:20px 0 12px;gap:8px}
+.nav,.act{display:flex;align-items:center;gap:4px}
+button{font:inherit}
+.nav button,.ghost{background:none;border:1px solid var(--line);color:var(--ink);border-radius:10px;height:36px;min-width:36px;padding:0 10px;font-size:14px;cursor:pointer}
+.nav button:hover,.ghost:hover{background:var(--card)}
+.range{font-size:14px;color:var(--mute);min-width:112px;text-align:center}
+.wrap{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:6px 6px 8px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;table-layout:fixed;min-width:300px}
+th.h{width:30%;text-align:left;font-size:12px;font-weight:600;color:var(--mute);text-transform:uppercase;letter-spacing:.05em;padding:8px 6px;border-bottom:1.5px solid var(--line)}
+th.dy{font-size:11px;font-weight:600;color:var(--mute);text-transform:uppercase;padding:6px 0 7px;border-bottom:1.5px solid var(--line);border-left:1px solid var(--line)}
+th.dy span{display:block;font-size:14px;color:var(--ink);text-transform:none;margin-top:1px}
+th.dy.today{background:var(--tod)}th.dy.today span{color:var(--acc)}
+td{border-top:1px solid var(--line);border-left:1px solid var(--line);padding:6px 3px;text-align:center}
+td.today{background:var(--tod)}
+td.n{border-left:0;text-align:left;padding:6px}
+.name{font-weight:600;font-size:14px;overflow-wrap:anywhere;line-height:1.25}
+.sub{font-size:11px;color:var(--mute);margin-top:2px}.sub b{color:var(--acc)}
+.box{width:100%;max-width:38px;aspect-ratio:1;border-radius:8px;border:1.5px solid var(--line);background:transparent;display:inline-grid;place-items:center;cursor:pointer;padding:0;color:#fff;transition:background .15s,border-color .15s,transform .1s}
+.box:hover{border-color:var(--acc)}.box:active{transform:scale(.9)}
+.box svg{width:58%;height:58%;stroke:currentColor;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round;display:none}
+.box.on{background:var(--acc);border-color:var(--acc)}.box.on .c{display:block}
+.box.miss{background:var(--redbg);border-color:var(--red);color:var(--red)}.box.miss .x{display:block}
+.box:disabled{opacity:.3;cursor:default;transform:none}
+.del{background:none;border:0;color:var(--mute);font-size:12px;cursor:pointer;padding:2px 0 0;text-decoration:underline}
+.del.arm{color:var(--red)}
+.add{display:flex;gap:8px;margin-top:18px}
+input{font:inherit;color:var(--ink)}
+.add input,.panel input{flex:1;min-width:0;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card);padding:0 14px;width:100%}
+.add input:focus,.panel input:focus{outline:2px solid var(--acc);outline-offset:-1px}
+.add button,.panel .go{height:44px;padding:0 18px;border:0;border-radius:12px;background:var(--acc);color:#fff;font-weight:600;cursor:pointer}
+.empty{text-align:center;color:var(--mute);padding:28px 12px;font-size:14px}
+.panel{display:none;margin-bottom:12px;padding:14px;background:var(--card);border:1px solid var(--line);border-radius:16px;font-size:14px}
+.panel.open{display:block}
+.panel .row{display:flex;gap:8px;margin-top:10px}
+.panel .go{height:40px}
+.panel small{display:block;color:var(--mute);margin-top:8px;font-size:12px}
+#st{font-weight:600}
+@media (min-width:600px){main{padding-top:48px}th.h{width:28%}.name{font-size:15px}.box{max-width:42px}}
+</style>
+</head>
+<body>
+<main>
+  <h1>Habits</h1>
+  <p id="today"></p>
+
+  <div class="bar">
+    <div class="nav">
+      <button id="prev" aria-label="Previous week">‹</button>
+      <span class="range" id="range"></span>
+      <button id="next" aria-label="Next week">›</button>
+    </div>
+    <div class="act">
+      <button class="ghost" id="syncbtn">Sync</button>
+      <button class="ghost" id="edit">Edit</button>
+    </div>
+  </div>
+
+  <div class="panel" id="panel">
+    <div>Status: <span id="st">Not connected</span></div>
+    <div class="row"><input id="tok" type="password" placeholder="GitHub token (gist permission)" autocomplete="off"></div>
+    <div class="row">
+      <button class="go" id="tsave">Connect</button>
+      <button class="ghost" id="tsync">Sync now</button>
+      <button class="ghost" id="toff">Disconnect</button>
+    </div>
+    <small>Use the same token on every device. It is stored only on this device.</small>
+  </div>
+
+  <div class="wrap"><div id="tbl"></div></div>
+
+  <form class="add" onsubmit="return false">
+    <input id="newname" type="text" maxlength="60" placeholder="New habit (e.g. Read 10 min)" autocomplete="off">
+    <button id="addbtn" type="button">Add</button>
+  </form>
+</main>
+
+<script>
+(function(){
+  var LS='ht-data', CF='ht-sync', FILE='habit-tracker.json';
+  var state={habits:[],cells:{}}, cfg={}, busy=false, tm;
+  try{state=JSON.parse(localStorage.getItem(LS))||state}catch(e){}
+  try{cfg=JSON.parse(localStorage.getItem(CF))||{}}catch(e){}
+  var weekOffset=0, editing=false, armed=null;
+  var DAYS=['M','T','W','T','F','S','S'], MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var $=function(id){return document.getElementById(id)};
+
+  function save(){try{localStorage.setItem(LS,JSON.stringify(state))}catch(e){}}
+  function saveCfg(){try{localStorage.setItem(CF,JSON.stringify(cfg))}catch(e){}}
+  function key(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+  function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function today(){var t=new Date();t.setHours(0,0,0,0);return t}
+  function wstart(o){var t=today();t.setDate(t.getDate()-((t.getDay()+6)%7)+o*7);return t}
+  function vis(){return state.habits.filter(function(h){return !h.del})}
+  function isDone(id,k){var c=state.cells[id+'|'+k];return !!(c&&c.v)}
+  function setCell(id,k,v){state.cells[id+'|'+k]={v:v,t:Date.now()};save();queue()}
+  function streak(id){var d=today(),n=0;if(!isDone(id,key(d)))d.setDate(d.getDate()-1);while(isDone(id,key(d))){n++;d.setDate(d.getDate()-1)}return n}
+
+  var ICON='<svg class="c" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><svg class="x" viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17"/></svg>';
+
+  function render(){
+    var start=wstart(weekOffset), t=today(), tk=key(t), days=[], H=vis();
+    for(var i=0;i<7;i++){var d=new Date(start);d.setDate(start.getDate()+i);days.push(d)}
+    $('range').textContent=days[0].getDate()+' '+MONTHS[days[0].getMonth()]+' – '+days[6].getDate()+' '+MONTHS[days[6].getMonth()];
+    $('next').disabled=weekOffset>=0;$('next').style.opacity=weekOffset>=0?.35:1;
+    $('edit').textContent=editing?'Done':'Edit';
+    var dt=H.filter(function(h){return isDone(h.id,tk)}).length;
+    $('today').textContent=H.length?'Today: '+dt+' of '+H.length+' completed':t.toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'long'});
+    var head='<tr><th class="h">Habits</th>'+days.map(function(d,i){return '<th class="dy'+(key(d)===tk?' today':'')+'">'+DAYS[i]+'<span>'+d.getDate()+'</span></th>'}).join('')+'</tr>';
+    var rows=H.map(function(h){
+      var s=streak(h.id), c0=h.created||tk;
+      var cells=days.map(function(d){
+        var k=key(d), on=isDone(h.id,k), fut=d>t, miss=!on&&k<tk&&k>=c0;
+        return '<td class="'+(k===tk?'today':'')+'"><button class="box'+(on?' on':'')+(miss?' miss':'')+'" data-h="'+h.id+'" data-k="'+k+'"'+(fut?' disabled':'')+' aria-label="'+esc(h.name)+' '+k+'" aria-pressed="'+on+'">'+ICON+'</button></td>';
+      }).join('');
+      var sub=editing?'<button class="del'+(armed===h.id?' arm':'')+'" data-del="'+h.id+'">'+(armed===h.id?'Sure? Tap again':'Delete')+'</button>':'<div class="sub"><b>'+s+'</b> '+(s===1?'day':'days')+'</div>';
+      return '<tr><td class="n"><div class="name">'+esc(h.name)+'</div>'+sub+'</td>'+cells+'</tr>';
+    }).join('');
+    $('tbl').innerHTML='<table>'+head+rows+'</table>'+(H.length?'':'<div class="empty">No habits yet.<br>Add your first one below and start small.</div>');
+  }
+
+  /* ---------- Sincronización con un Gist privado de GitHub ---------- */
+  function setStatus(s){$('st').textContent=s}
+  function api(path,opt){
+    opt=opt||{};
+    opt.headers={'Authorization':'Bearer '+cfg.token,'Accept':'application/vnd.github+json','Content-Type':'application/json'};
+    return fetch('https://api.github.com'+path,opt).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()});
+  }
+  function merge(r){
+    (r.habits||[]).forEach(function(rh){
+      var lh=state.habits.find(function(h){return h.id===rh.id});
+      if(!lh)state.habits.push(rh);else if((rh.t||0)>(lh.t||0))Object.assign(lh,rh);
+    });
+    Object.keys(r.cells||{}).forEach(function(k){var l=state.cells[k],c=r.cells[k];if(!l||c.t>l.t)state.cells[k]=c});
+  }
+  function body(){var f={};f[FILE]={content:JSON.stringify(state)};return f}
+  function findGist(){
+    if(cfg.gist)return Promise.resolve(cfg.gist);
+    return api('/gists?per_page=100').then(function(list){
+      var g=list.find(function(x){return x.files&&x.files[FILE]});
+      if(g){cfg.gist=g.id;saveCfg();return g.id}
+      return api('/gists',{method:'POST',body:JSON.stringify({description:'Habit tracker data',public:false,files:body()})}).then(function(n){cfg.gist=n.id;saveCfg();return n.id});
+    });
+  }
+  function sync(){
+    if(!cfg.token||busy)return;
+    busy=true;setStatus('Syncing…');
+    findGist().then(function(id){
+      return api('/gists/'+id).then(function(g){
+        var f=g.files[FILE];
+        return f?(f.truncated?fetch(f.raw_url).then(function(r){return r.text()}):f.content):'{}';
+      }).then(function(txt){
+        try{merge(JSON.parse(txt))}catch(e){}
+        save();render();
+        return api('/gists/'+id,{method:'PATCH',body:JSON.stringify({files:body()})});
+      });
+    }).then(function(){setStatus('Synced ✓')})
+    .catch(function(e){
+      if(e.message==='404'&&cfg.gist){cfg.gist=null;saveCfg()}
+      setStatus(e.message==='401'?'Invalid token':'Offline or error ('+e.message+')');
+    }).then(function(){busy=false});
+  }
+  function queue(){clearTimeout(tm);tm=setTimeout(sync,1200)}
+
+  /* ---------- Eventos ---------- */
+  $('tbl').addEventListener('click',function(e){
+    var b=e.target.closest('.box');
+    if(b&&!b.disabled){setCell(b.dataset.h,b.dataset.k,isDone(b.dataset.h,b.dataset.k)?0:1);render();return}
+    var del=e.target.closest('.del');
+    if(del){
+      var id=del.dataset.del;
+      if(armed===id){var h=state.habits.find(function(x){return x.id===id});h.del=1;h.t=Date.now();armed=null;save();queue()}else armed=id;
+      render();
+    }
+  });
+  function addHabit(){
+    var n=$('newname').value.trim();if(!n)return;
+    state.habits.push({id:'h'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),name:n,created:key(today()),t:Date.now()});
+    $('newname').value='';save();render();queue();
+  }
+  $('addbtn').addEventListener('click',addHabit);
+  $('newname').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();addHabit()}});
+  $('prev').addEventListener('click',function(){weekOffset--;render()});
+  $('next').addEventListener('click',function(){if(weekOffset<0){weekOffset++;render()}});
+  $('edit').addEventListener('click',function(){editing=!editing;armed=null;render()});
+  $('syncbtn').addEventListener('click',function(){$('panel').classList.toggle('open')});
+  $('tsave').addEventListener('click',function(){var v=$('tok').value.trim();if(!v)return;cfg={token:v};saveCfg();$('tok').value='';sync()});
+  $('tsync').addEventListener('click',sync);
+  $('toff').addEventListener('click',function(){cfg={};saveCfg();setStatus('Not connected')});
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)sync()});
+  window.addEventListener('online',sync);
+
+  if(cfg.token)setStatus('Connected');
+  if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
+  render();sync();
+})();
+</script>
+</body>
+</html>
